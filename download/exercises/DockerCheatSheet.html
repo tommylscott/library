@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Reskill Bootcamp - Docker Cheat Sheet</title>
+<style type="text/css">
+body {
+    font-family: sans-serif;
+    padding-left: 10px;
+}
+dt:before {
+    content: "# "
+}
+code:before {
+    content: "> "
+}
+code {
+    background-color: black;
+    color: white;
+    padding-bottom: 3px;
+    padding-right: 3px;
+    padding-left: 5px;
+    overflow-x: auto;
+    overflow-wrap: normal;
+    white-space: pre;
+    padding: 5px;
+}
+pre {
+    overflow-x: auto;
+    background-color: #b0dddd;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.2em;
+    padding: 9px;
+    
+}
+li {
+    font-weight: bold;
+}
+em {
+	font-style: normal;
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+<h1>Docker Commands for Class Exercises</h1>
+<p>
+    Use the following guidelines to work with Docker images and containers for the class. They will
+    help reduce the number of docker ps, docker images & copy/pastes you have to run to manage them.
+</p>
+<p>
+    All commands except build can be executed from any folder location in your terminal
+</p>
+<p>
+    Assumptions: Book inventory service port is 9002, Library service port is 9001
+</p>
+<ul>
+<li>Creating images</li>
+<p>Tag images with appropriate names & versions. <em>
+    Assumes your "Dockerfile"s are in project root folders
+</em>
+</p>
+<pre>
+Open terminal under book inventory project
+
+<code>docker build -t bookinventoryservice:1.0 .</code>
+
+Update bookinventory.endpoint in library service project to http://bookinventoryservice:9002.
+You will name the book inventory container as bookinventoryservice below.
+Open terminal under library service project
+
+<code>docker build -t libraryservice:1.0 .</code>
+</pre>
+
+<li>Deleting images</li>
+<p>Make sure there are no active or inactive containers using <em>docker ps -a</em> command</p>
+<pre>
+<code>docker rmi bookinventoryservice:1.0</code>
+
+<code>docker rmi libraryservice:1.0</code>
+</pre>
+
+<li>
+    Create User Defined Bridge for Inter-Container communication
+</li>
+<p>
+    Allows you to use service names for connections. This option works when all
+    containers are on the same host.
+</p>
+<pre>
+<code>docker network create --driver bridge libnetwork</code>
+
+Verify that new bridge is created
+
+<code>docker network ls</code>
+</pre>
+
+<li>
+    Creating and Running containers
+</li>
+<p>
+    Create the containers using the following options:
+<pre>
+    --rm:           automatically removes the container after it is stopped.
+    -it:            run in interactive (-i keeps STDIN open, -t allocates terminal)
+    --name [name]:  allows you to use the name as hostname in urls & prevents you 
+                    from creating more containers with the same name
+    -p [container_port]:[host_port]: publish continer port to the host port
+</pre>
+</p>
+<pre>
+<code>docker run -it --rm --name bookinventoryservice --net libnetwork -p 9001:9001 bookinventoryservice:1.0</code>
+
+<code>docker run -it --rm --name libraryservice --net libnetwork -p 9002:9002 libraryservice:1.0</code>
+</pre>
+<li>
+    Attaching to Container
+</li>
+<p> Use the container names to attach to containers</p>
+<pre>
+<code>docker exec -it bookinventoryservice /bin/bash</code>
+
+<code>docker exec -it libraryservice /bin/bash</code>
+</pre>
+<li>
+    Stopping and Removing Containers
+</li>
+<p>
+    <em>Automatic</em><br/>
+    If container was started using --rm -it options, entering <em>Ctrl-C </em>in the terminal where the container is running
+    will stop and remove the container
+</p>
+
+<p> <em>Manual</em><br/>
+    If container was not started using --rm -it options
+</p>
+<pre>
+<code>docker stop bookinventoryservice</code>
+
+<code>docker rm bookinventoryservice</code>
+
+<code>docker stop libraryservice</code>
+
+<code>docker rm libraryservice</code>
+</pre>
+</ul>
+</body>
+</html>

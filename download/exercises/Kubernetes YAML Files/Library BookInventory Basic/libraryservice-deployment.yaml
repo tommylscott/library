@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: libraryservicedeployment
+spec:
+  selector:
+    matchLabels:
+      app: libraryservice
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: libraryservice
+    spec:
+      containers:
+      - image: us.icr.io/billscrns/libraryservice:1.0
+        name: libraryservice
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9004
+      restartPolicy: Always
